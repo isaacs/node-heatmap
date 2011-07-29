@@ -2,8 +2,6 @@ var $ = require('jquery-browserify');
 var heatmap = require('./');
 
 $(window).ready(function () {
-    $(document.body).css('background-color', 'black');
-    
     var canvas = $('<canvas>').attr({
         width : 500,
         height : 500
@@ -11,7 +9,7 @@ $(window).ready(function () {
     
     var heat = heatmap(canvas.get(0));
     
-    for (var i = 0; i < 1000; i++) {
+    for (var i = 0; i < 5000; i++) {
         var rho = Math.random() * 2 * Math.PI;
         var z = Math.pow(Math.random(), 2) * 250;
         

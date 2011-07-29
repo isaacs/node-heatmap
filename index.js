@@ -17,20 +17,38 @@ function createCanvas (width, height) {
 }
 
 var exports = module.exports = function (canvas) {
+    var opts = {};
+    
     if (typeof canvas !== 'object') {
         canvas = createCanvas(arguments[0], arguments[1]);
+        opts = arguments[2] || {};
     }
-    return new Heat(canvas)
+    else if (!canvas) {
+        canvas = createCanvas(500, 500);
+    }
+    else if (Object.getPrototypeOf(canvas) === Object.prototype) {
+        opts = canvas;
+        if (opts.canvas) {
+            canvas = opts.canvas;
+        }
+        else if (opts.width && opts.height) {
+            canvas = createCanvas(opts.width, opts.height);
+        }
+    }
+    return new Heat(canvas, opts)
 };
 
-function Heat (canvas) {
+function Heat (canvas, opts) {
+    if (!opts) opts = {};
+    
     this.canvas = canvas;
     this.alphaCanvas = createCanvas(canvas.width, canvas.height);
+    this.radius = opts.radius || 20;
 }
 
-Heat.prototype.addPoint = function (x, y) {
+Heat.prototype.addPoint = function (x, y, radius) {
     var ctx = this.alphaCanvas.getContext('2d');
-    var radius = 20;
+    if (!radius) radius = this.radius;
     
     var g = ctx.createRadialGradient(x, y, 0, x, y, radius);
     var a = 1 / 10;
@@ -60,16 +78,16 @@ Heat.prototype.draw = function () {
             heat.data[i] = rgb[0];
             heat.data[i+1] = rgb[1];
             heat.data[i+2] = rgb[2];
-            heat.data[i+3] = 255;
+            heat.data[i+3] = v;
         }
     }
     
-    this.clear();
+    this.clearCanvas();
     this.canvas.getContext('2d').putImageData(heat, 0, 0);
     return this;
 };
 
-Heat.prototype.clear = function () {
+Heat.prototype.clearCanvas = function () {
     var ctx = this.canvas.getContext('2d');
     ctx.fillStyle = null;
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
