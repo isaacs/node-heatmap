@@ -1,5 +1,5 @@
 var $ = require('jquery-browserify');
-var heatmap = require('./');
+var heatmap = require('heatmap');
 
 $(window).ready(function () {
     var canvas = $('<canvas>').attr({

@@ -38,12 +38,15 @@ var exports = module.exports = function (canvas) {
     return new Heat(canvas, opts)
 };
 
+exports.Heat = Heat;
+
 function Heat (canvas, opts) {
     if (!opts) opts = {};
     
     this.canvas = canvas;
     this.alphaCanvas = createCanvas(canvas.width, canvas.height);
     this.radius = opts.radius || 20;
+    this.threshold = opts.threshold || 0;
 }
 
 Heat.prototype.addPoint = function (x, y, radius) {
@@ -72,7 +75,7 @@ Heat.prototype.draw = function () {
     
     for (var i = 0; i < values.data.length; i += 4) {
         var v = values.data[i+3];
-        if (v > 5) {
+        if (v > this.threshold) {
             var theta = (1 - values.data[i+3] / 255) * 270;
             var rgb = convert.hsl2rgb(theta, 100, 50);
             heat.data[i] = rgb[0];

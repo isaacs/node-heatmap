@@ -1,0 +1,40 @@
+{
+    "name" : "heatmap",
+    "version" : "0.0.0",
+    "description" : "canvas heat maps for node and the browser",
+    "main" : "index.js",
+    "directories" : {
+        "lib" : ".",
+        "example" : "example",
+        "test" : "test"
+    },
+    "dependencies" : {
+        "color-convert" : "0.2.x",
+        "canvas" : "0.7.x"
+    },
+    "devDependencies" : {
+        "expresso" : "0.7.x",
+        "jquery-browserify" : "1.6.x",
+        "browserify" : "1.3.x",
+        "uglify-js" : ">=1.0.6 <1.1"
+    },
+    "scripts" : {
+        "test" : "expresso"
+    },
+    "repository" : {
+        "type" : "git",
+        "url" : "http://github.com/substack/node-heatmap.git"
+    },
+    "keywords" : [
+        "heatmap",
+        "canvas",
+        "browser"
+    ],
+    "author" : {
+        "name" : "James Halliday",
+        "email" : "mail@substack.net",
+        "url" : "http://substack.net"
+    },
+    "license" : "MIT/X11",
+    "engine" : { "node" : ">=0.4" }
+}
