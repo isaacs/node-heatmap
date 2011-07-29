@@ -55,7 +55,8 @@ Heat.prototype.draw = function () {
     for (var i = 0; i < values.data.length; i += 4) {
         var v = values.data[i+3];
         if (v > 5) {
-            var rgb = convert.hsl2rgb(values.data[i+3] / 255 * 359, 100, 50);
+            var theta = (1 - values.data[i+3] / 255) * 270;
+            var rgb = convert.hsl2rgb(theta, 100, 50);
             heat.data[i] = rgb[0];
             heat.data[i+1] = rgb[1];
             heat.data[i+2] = rgb[2];
