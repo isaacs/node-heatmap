@@ -12,10 +12,13 @@ $(window).ready(function () {
     var heat = heatmap(canvas.get(0));
     
     for (var i = 0; i < 100; i++) {
-        var x = Math.random() * 500;
-        var y = Math.random() * 500;
-        var value = Math.random();
-        heat.addPoint(x, y, value);
+        var rx = 2 * Math.random() - 1;
+        var x = (1 + (rx * rx) * (rx < 0 ? -0.5 : 0.5)) * 500;
+        
+        var ry = 2 * Math.random() - 1;
+        var y = (1 + (ry * ry) * (ry < 0 ? -0.5 : 0.5)) * 500;
+        
+        heat.addPoint(x, y);
     }
     
     heat.draw();
