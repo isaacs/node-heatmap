@@ -4,57 +4,39 @@ if (process.argv) {
     var Canvas = (require)('canvas');
 }
 
+function createCanvas (width, height) {
+    if (typeof Canvas !== 'undefined') {
+        return new Canvas(width, height);
+    }
+    else {
+        var canvas = document.createElement('canvas');
+        canvas.setAttribute('width', width);
+        canvas.setAttribute('height', height);
+        return canvas;
+    }
+}
+
 var exports = module.exports = function (canvas) {
     if (typeof canvas !== 'object') {
-        canvas = new Canvas(arguments[0], arguments[1]);
+        canvas = createCanvas(arguments[0], arguments[1]);
     }
     return new Heat(canvas)
 };
 
 function Heat (canvas) {
     this.canvas = canvas;
-    var ctx = this.context = canvas.getContext("2d");
-    
-    this.mask = this.generateMask(50);
-    this.points = [];
-    
-    this.maximum = 0;
+    this.alphaCanvas = createCanvas(canvas.width, canvas.height);
 }
 
-Heat.prototype.addPoint = function (x, y, value) {
-    this.points.push({ x : x, y : y, value : value || 1 });
-    if (value > this.maximum) this.maximum = value;
-    return this;
-};
-
-Heat.prototype.draw = function () {
-    var self = this;
-    
-    self.points
-        .sort(function (a, b) {
-            return a.value - b.value
-        })
-        .forEach(function (pt) {
-            self.drawPoint(pt);
-        })
-    ;
-    return self;
-};
-
-Heat.prototype.drawPoint = function (x, y, value, radius) {
-    if (typeof x === 'object') {
-        var pt = x;
-        x = pt.x, y = pt.y, value = pt.value, radius = pt.radius;
-    }
-    
-    var ctx = this.context;
-    if (!radius) radius = 20;
+Heat.prototype.addPoint = function (x, y) {
+    var ctx = this.alphaCanvas.getContext('2d');
+    var radius = 20;
     
     var g = ctx.createRadialGradient(x, y, 0, x, y, radius);
-    g.addColorStop(0, rgb(value / this.maximum, 1));
-    g.addColorStop(0.5, rgb(value / this.maximum, 1));
-    g.addColorStop(0.85, rgb(value / this.maximum - 1 / 12, 0.2));
-    g.addColorStop(1, rgb(value / this.maximum - 1 / 6, 0));
+    var a = 1 / 10;
+    
+    g.addColorStop(0, 'rgba(255,255,255,' + a + ')');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
     
     ctx.fillStyle = g;
     ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
@@ -62,32 +44,33 @@ Heat.prototype.drawPoint = function (x, y, value, radius) {
     return this;
 };
 
-Heat.prototype.generateMask = function (radius) {
-    var ctx = this.context;
+Heat.prototype.draw = function () {
+    var width = this.canvas.width;
+    var height = this.canvas.height;
+    var ctx = this.alphaCanvas.getContext('2d');
     
-    var g = ctx.createRadialGradient(
-        radius / 2, radius / 2, 0,
-        radius / 2, radius / 2, radius
-    );
+    var values = ctx.getImageData(0, 0, width, height);
+    var heat = ctx.createImageData(width, height);
     
-    g.addColorStop(0, 'rgba(255,255,255,1)');
-    g.addColorStop(1, 'rgba(255,255,255,0)');
+    for (var i = 0; i < values.data.length; i += 4) {
+        var v = values.data[i+3];
+        if (v > 5) {
+            var rgb = convert.hsl2rgb(values.data[i+3] / 255 * 359, 100, 50);
+            heat.data[i] = rgb[0];
+            heat.data[i+1] = rgb[1];
+            heat.data[i+2] = rgb[2];
+            heat.data[i+3] = 255;
+        }
+    }
     
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 2 * radius, 2 * radius);
-    
-    var mask = ctx.getImageData(0, 0, 2 * radius, 2 * radius);
-    
+    this.clear();
+    this.canvas.getContext('2d').putImageData(heat, 0, 0);
+    return this;
+};
+
+Heat.prototype.clear = function () {
+    var ctx = this.canvas.getContext('2d');
     ctx.fillStyle = null;
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    return mask;
-} 
-
-function rgb (v, a) {
-    var theta = Math.min(270, Math.max(0, (1 - v) * 360));
-    if (v < 0.5) a *= Math.pow(2 * v, 2);
-    
-    var rgba = convert.hsl2rgb(theta, 100, 50).concat(a);
-    return 'rgba(' + rgba.join(',') + ')';
-}
+    return this;
+};
